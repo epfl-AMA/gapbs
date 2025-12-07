@@ -15,5 +15,5 @@ COPY ./pagerank.mk /root/gapbs/Makefile
 
 RUN make all
 
-
+RUN rm -rf /var/lib/apt/lists/*
 
