@@ -73,6 +73,16 @@ $(GRAPH_DIR)/webU.sg: $(RAW_GRAPH_DIR)/sk-2005/sk-2005.mtx converter
 
 # Synthetic
 
+# Generic pattern rule for kron graphs of any size
+# Usage: make benchmark/graphs/kron<n>.sg where <n> is any integer
+$(GRAPH_DIR)/kron%.sg: converter
+	./converter -g$* -k16 -b $@
+
+$(GRAPH_DIR)/kron%U.sg: $(GRAPH_DIR)/kron%.sg converter
+	rm -f $@
+	ln -s $(notdir $<) $@
+
+# Backward compatibility - keep old kron shortcuts
 KRON_ARGS = -g27 -k16
 $(GRAPH_DIR)/kron.sg: converter
 	./converter $(KRON_ARGS) -b $@
@@ -80,22 +90,6 @@ $(GRAPH_DIR)/kron.sg: converter
 $(GRAPH_DIR)/kronU.sg: $(GRAPH_DIR)/kron.sg converter
 	rm -f $@
 	ln -s kron.sg $@
-
-KRON_ARGS_28 = -g28 -k16
-$(GRAPH_DIR)/kron28.sg: converter
-	./converter $(KRON_ARGS_28) -b $@
-
-$(GRAPH_DIR)/kron28U.sg: $(GRAPH_DIR)/kron28.sg converter
-	rm -f $@
-	ln -s kron28.sg $@
-
-KRON_ARGS_29 = -g29 -k16
-$(GRAPH_DIR)/kron29.sg: converter
-	./converter $(KRON_ARGS_29) -b $@
-
-$(GRAPH_DIR)/kron29U.sg: $(GRAPH_DIR)/kron29.sg converter
-	rm -f $@
-	ln -s kron29.sg $@
 
 
 URAND_ARGS = -u27 -k16
@@ -128,19 +122,27 @@ pagerank-all: $(OUTPUT_DIR) $(OUTPUT_FILES)
 $(OUTPUT_DIR)/pr-%.out: $(GRAPH_DIR)/%.sg pr
 	./pr -f $< -i1000 -t1e-4 -n32 > $@
 
-.PHONY: pagerank-kron
-BENCH_ORDER = pr-kron
-pagerank-kron: $(OUTPUT_DIR) $(OUTPUT_FILES)
+# Generic pattern rules for pagerank on any graph
+# Usage: make pagerank-<graphtype><n> where graphtype is twitter, web, road, kron, or urand
+.PHONY: pagerank-twitter%
+pagerank-twitter%: $(OUTPUT_DIR)/pr-twitter%.out
+	@echo "Completed pagerank for twitter$*"
 
+.PHONY: pagerank-web%
+pagerank-web%: $(OUTPUT_DIR)/pr-web%.out
+	@echo "Completed pagerank for web$*"
 
-.PHONY: pagerank-kron28
-BENCH_ORDER = pr-kron28
-pagerank-kron28: $(OUTPUT_DIR) $(OUTPUT_FILES)
+.PHONY: pagerank-road%
+pagerank-road%: $(OUTPUT_DIR)/pr-road%.out
+	@echo "Completed pagerank for road$*"
 
+.PHONY: pagerank-kron%
+pagerank-kron%: $(OUTPUT_DIR)/pr-kron%.out
+	@echo "Completed pagerank for kron$*"
 
-.PHONY: pagerank-kron29
-BENCH_ORDER = pr-kron29
-pagerank-kron29: $(OUTPUT_DIR) $(OUTPUT_FILES)
+.PHONY: pagerank-urand%
+pagerank-urand%: $(OUTPUT_DIR)/pr-urand%.out
+	@echo "Completed pagerank for urand$*"
 
 
 CXX_FLAGS += -std=c++11 -O3 -Wall
