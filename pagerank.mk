@@ -73,6 +73,9 @@ $(GRAPH_DIR)/webU.sg: $(RAW_GRAPH_DIR)/sk-2005/sk-2005.mtx converter
 
 # Synthetic
 
+# Prevent Make from deleting intermediate files (graphs and output files)
+.SECONDARY:
+
 # Generic pattern rule for kron graphs of any size
 # Usage: make benchmark/graphs/kron<n>.sg where <n> is any integer
 $(GRAPH_DIR)/kron%.sg: converter
